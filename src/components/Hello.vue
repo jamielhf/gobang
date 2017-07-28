@@ -26,6 +26,7 @@ export default {
       len:15,
       classObj:{},
       pointObj:[],
+      isOver:false,
       machine:[],
       a:[[1,2],[3,4]]
     }
@@ -54,6 +55,11 @@ export default {
      * @returns {boolean}
      */
     setPoint(x,y){
+
+        if(this.isOver){
+           return false
+        }
+
         if(this.pointObj[x][y]!=''){
             return false
         }
@@ -70,9 +76,104 @@ export default {
 
          this.turn = 'my'
        }
+       this.isGameOver(x,y)
     },
-    isGameOver(){
+    //每一步判断游戏结果
+    isGameOver(x,y){
+       let t = 'b' , step = 1;
+       if(this.turn=='my'){
+         t = 'w';
+       }
+       //纵向判断
+       for(let i=1;x-i>=0;i++){
+          if(this.pointObj[x-i][y] == t){
+              step++
+          }else{
+              break
+          }
+       }
+      for(let i=1;x+i<=14;i++){
+        if(this.pointObj[x+i][y] == t){
+          step++
+        }else{
+          break
+        }
+      }
 
+      if(step>=5){
+        this.isOver = true
+        alert('win')
+        return
+      }else{
+          step = 1;
+      }
+
+      //横向判断
+      for(let i=1;y-i>=0;i++){
+        if(this.pointObj[x][y-i] == t){
+          step++
+        }else{
+          break
+        }
+      }
+      for(let i=1;y+i<=14;i++){
+        if(this.pointObj[x][y+i] == t){
+          step++
+        }else{
+          break
+        }
+      }
+      if(step>=5){
+        this.isOver = true
+        alert('win')
+        return
+      }else{
+        step = 1;
+      }
+
+      for(let i=1;x-i>=0,y-i>=0;i++){
+        if(this.pointObj[x-i][y-i] == t){
+          step++
+        }else{
+          break
+        }
+      }
+      for(let i=1;x+i<=14,y+i<=14;i++){
+        if(this.pointObj[x+i][y+i] == t){
+          step++
+        }else{
+          break
+        }
+      }
+      if(step>=5){
+        this.isOver = true
+        alert('win');
+        return
+      }else{
+        step = 1;
+      }
+
+      for(let i=1;x-i>=0,y+i<=14;i++){
+        if(this.pointObj[x-i][y+i] == t){
+          step++
+        }else{
+          break
+        }
+      }
+      for(let i=1;x+i<=14,y-i>=0;i++){
+        if(this.pointObj[x+i][y-i] == t){
+          step++
+        }else{
+          break
+        }
+      }
+      if(step>=5){
+        this.isOver = true
+        alert('win')
+        return
+      }else{
+        step = 1;
+      }
     }
   }
 }
@@ -88,6 +189,8 @@ export default {
     font-size: 20px;
   }
   #app {
+
+    margin: 0 auto;
     text-align: center;
   }
   h1 {
@@ -95,7 +198,10 @@ export default {
     text-align: center;
   }
   .chess {
-    margin-bottom: 30px;
+    position: relative;
+    left: 50%;
+    width: 1000px;
+    margin: 0 0 30px -500px;
     font-size: 0;
   }
 
