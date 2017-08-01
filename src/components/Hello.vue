@@ -4,8 +4,8 @@
     <!--<p>  {{a}}</p>-->
       <template v-for="(i,x) in pointObj">
           <template v-for="(v,y) in i">
-            <i @click="setPoint(x,y)" :class="v"> {{x}},{{y}},{{v}}</i>
-            <br v-if="y == 14">
+            <i @click="setPoint(x,y)" :class="v==1?'b':v==2?'w':''"> {{x}},{{y}},{{v}}</i>
+            <br v-if="y == 15">
         </template>
       </template>
 
@@ -38,10 +38,10 @@ export default {
   created(){
     let pointObj  = [];
     let len =15;
-    for(let x=0; x<len; x++){
+    for(let x=1; x<=len; x++){
       pointObj[x] = []
-      for(let y=0; y<len; y++){
-        pointObj[x][y]=''
+      for(let y=1; y<=len; y++){
+        pointObj[x][y]=0
       }
     }
 
@@ -66,114 +66,80 @@ export default {
 
        if(this.turn=='my'){
 
-         this.pointObj[x].splice(y,1,'b');
+         this.pointObj[x].splice(y,1,1);
 
          this.turn = 'machine'
 
        }else if(this.turn=='machine'){
 
-         this.pointObj[x].splice(y,1,'w');
+         this.pointObj[x].splice(y,1,2);
 
          this.turn = 'my'
        }
        this.isGameOver(x,y)
     },
-    //每一步判断游戏结果
+    ai(){
+
+    },
+    /**
+     * 每一步判断游戏结果
+     * @param x
+     * @param y
+     */
     isGameOver(x,y){
-       let t = 'b' , step = 1;
-       if(this.turn=='my'){
-         t = 'w';
-       }
-       //纵向判断
-       for(let i=1;x-i>=0;i++){
-          if(this.pointObj[x-i][y] == t){
-              step++
-          }else{
-              break
-          }
-       }
-      for(let i=1;x+i<=14;i++){
-        if(this.pointObj[x+i][y] == t){
-          step++
-        }else{
-          break
+      let max = 0;  //是否赢了
+      let flag;
+      let tempXIndex = x;
+      let tempYIndex = y;
+      // 三维数组记录横向，纵向，左斜，右斜的移动
+      let dir = [
+        // 横向
+        [ [ -1, 0 ], [ 1, 0] ],
+       // 竖着
+        [ [  0, -1 ], [ 0, 1 ] ],
+        // 左斜
+        [ [  -1, -1 ], [ 1, 1 ] ],
+         // 右斜
+        [ [  1, -1 ], [ -1, 1 ] ]
+
+       ];
+
+      for (let i = 0; i < 4; i++) {
+       let count = 1;
+        //j为0,1分别为棋子的两边方向，比如对于横向的时候，j=0,表示下棋位子的左边，j=1的时候表示右边
+        for (let j = 0; j < 2; j++) {
+          flag = true;
+          /**
+           while语句中为一直向某一个方向遍历
+           有相同颜色的棋子的时候，Count++
+           否则置flag为false，结束该该方向的遍历
+           **/
+          while (flag) {
+            tempXIndex = tempXIndex + dir[i][j][0];
+            tempYIndex = tempYIndex + dir[i][j][1];
+            if(tempXIndex===0||tempYIndex===0) break;
+            if ((this.pointObj[tempXIndex][tempYIndex] === this.pointObj[x][y])) {
+              count++;
+
+            } else
+              flag = false;
+            }
+            tempXIndex = x;
+            tempYIndex = y;
         }
+
+        if (count >= 5) {
+          max = 1;
+          break;
+        } else
+          max = 0;
+      }
+      if (max === 1){
+          alert('赢了')
+        return true;
       }
 
-      if(step>=5){
-        this.isOver = true
-        alert('win')
-        return
-      }else{
-          step = 1;
-      }
 
-      //横向判断
-      for(let i=1;y-i>=0;i++){
-        if(this.pointObj[x][y-i] == t){
-          step++
-        }else{
-          break
-        }
-      }
-      for(let i=1;y+i<=14;i++){
-        if(this.pointObj[x][y+i] == t){
-          step++
-        }else{
-          break
-        }
-      }
-      if(step>=5){
-        this.isOver = true
-        alert('win')
-        return
-      }else{
-        step = 1;
-      }
-
-      for(let i=1;x-i>=0,y-i>=0;i++){
-        if(this.pointObj[x-i][y-i] == t){
-          step++
-        }else{
-          break
-        }
-      }
-      for(let i=1;x+i<=14,y+i<=14;i++){
-        if(this.pointObj[x+i][y+i] == t){
-          step++
-        }else{
-          break
-        }
-      }
-      if(step>=5){
-        this.isOver = true
-        alert('win');
-        return
-      }else{
-        step = 1;
-      }
-
-      for(let i=1;x-i>=0,y+i<=14;i++){
-        if(this.pointObj[x-i][y+i] == t){
-          step++
-        }else{
-          break
-        }
-      }
-      for(let i=1;x+i<=14,y-i>=0;i++){
-        if(this.pointObj[x+i][y-i] == t){
-          step++
-        }else{
-          break
-        }
-      }
-      if(step>=5){
-        this.isOver = true
-        alert('win')
-        return
-      }else{
-        step = 1;
-      }
     }
   }
 }
