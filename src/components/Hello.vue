@@ -28,6 +28,7 @@ export default {
       pointObj:[],
       isOver:false,
       machine:[],
+      myS:0,
       a:[[1,2],[3,4]]
     }
   },
@@ -77,8 +78,123 @@ export default {
          this.turn = 'my'
        }
        this.isGameOver(x,y)
+       this.score(x,y)
     },
+
+    score(x,y){
+      let max = 0;  //是否赢了
+      let flag;
+      let tempXIndex = x;
+      let tempYIndex = y;
+
+      let score = 0;
+      // 三维数组记录横向，纵向，左斜，右斜的移动
+      let dir = [
+        // 横向
+        [ [ -1, 0 ], [ 1, 0] ],
+        // 竖着
+        [ [  0, -1 ], [ 0, 1 ] ],
+        // 左斜
+        [ [  -1, -1 ], [ 1, 1 ] ],
+        // 右斜
+        [ [  1, -1 ], [ -1, 1 ] ]
+
+      ];
+      let time = 1;  //多个
+      for (let i = 0; i < 4; i++) {
+        let count = 1;
+        let isAlive = 0;  //边界是否有对手的棋子
+
+        //j为0,1分别为棋子的两边方向，比如对于横向的时候，j=0,表示下棋位子的左边，j=1的时候表示右边
+        for (let j = 0; j < 2; j++) {
+          flag = true;
+          /**
+           while语句中为一直向某一个方向遍历
+           有相同颜色的棋子的时候，Count++
+           否则置flag为false，结束该该方向的遍历
+           **/
+          while (flag) {
+            tempXIndex = tempXIndex + dir[i][j][0];
+            tempYIndex = tempYIndex + dir[i][j][1];
+            if(tempXIndex===0||tempYIndex===0) break;
+            //当前点的5个点范围内去计算
+            if (Math.abs(tempXIndex-x)>4||Math.abs(tempYIndex-y)>4){
+              flag = false;
+              break;
+            }
+            if ((this.pointObj[tempXIndex][tempYIndex] === this.pointObj[x][y])) {
+              count++;
+
+            } else if(this.pointObj[tempXIndex][tempYIndex]===0){
+
+            }else{
+              isAlive++
+              flag = false;
+            }
+
+          }
+          tempXIndex = x;
+          tempYIndex = y;
+        }
+
+       if(count>=5){
+          score +=10000
+       }
+       console.log(isAlive)
+       if(count===2){
+           if(isAlive===0){
+             if(time==1){
+               score+=100
+               console.log('------活2-------')
+             }else if(time==2){
+               score+=500
+               console.log('------双活2-------')
+             }
+             time++
+
+           }else if(isAlive===1){
+             score+=50
+             console.log('------眠2-------')
+           }else if(isAlive===2){
+             score+=10
+             console.log('------死2-------')
+           }
+
+       }
+        if(count===3){
+          if(isAlive===0){
+            if(time==1){
+              score+=1000
+              console.log('------活3-------')
+            }else if(time==2){
+              score+=5000
+              console.log('------双活3-------')
+            }
+            time++
+          }else if(isAlive===1){
+            if(time==1){
+              score+=200
+              console.log('------眠3-------')
+            }else if(time==2){
+              score+=500
+              console.log('------双眠3-------')
+            }
+            time++
+          }else if(isAlive===2){
+            score+=100
+            console.log('------死3-------')
+          }
+
+        }
+
+
+      }
+
+    },
+
     ai(){
+
+
 
     },
     /**
@@ -135,7 +251,12 @@ export default {
           max = 0;
       }
       if (max === 1){
-          alert('赢了')
+        if(this.turn=='my'){
+          alert('你赢了')
+        }else{
+          alert('ai赢了')
+        }
+
         return true;
       }
 
