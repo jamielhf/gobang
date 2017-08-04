@@ -1,7 +1,7 @@
 <template>
 
     <div class="chess">
-    <!--<p>  {{a}}</p>-->
+    <p>轮到{{txt}}</p>
       <template v-for="(i,x) in pointObj">
           <template v-for="(v,y) in i">
             <i @click="setPoint(x,y)" :class="v==1?'b':v==2?'w':''"> {{x}},{{y}},{{v}}</i>
@@ -29,6 +29,7 @@ export default {
       isOver:false,
       machine:[],
       myS:0,
+
       userScore:0,
       aiScore:0,
       a:[[1,2],[3,4]]
@@ -36,7 +37,9 @@ export default {
   },
 
   computed:{
-
+    txt:function () {
+      return this.turn==='my'?'我':'机器'
+    }
   },
   created(){
     let pointObj  = [];
@@ -88,6 +91,15 @@ export default {
       let tempYIndex = y;
 
       let score = this.turn==='my'?this.userScore:this.aiScore;
+
+
+       let a1 = 7 - Math.abs(x-8)
+       let a2 = 7 - Math.abs(y-8)
+       if(a1-a2>=0){
+         score+=a2
+       }else{
+         score+=a1
+       }
 
       // 三维数组记录横向，纵向，左斜，右斜的移动
       let dir = [
@@ -310,15 +322,13 @@ export default {
     },
 
     ai(){
-
+      let len = 15;
       for(let x=1; x<=len; x++){
 
         for(let y=1; y<=len; y++){
 //          this.pointObj[x][y]
         }
       }
-
-
 
     },
     /**
