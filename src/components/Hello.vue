@@ -29,6 +29,8 @@ export default {
       isOver:false,
       machine:[],
       myS:0,
+      userScore:0,
+      aiScore:0,
       a:[[1,2],[3,4]]
     }
   },
@@ -69,16 +71,14 @@ export default {
 
          this.pointObj[x].splice(y,1,1);
 
-         this.turn = 'machine'
+         this.score(x,y);
+         this.isGameOver(x,y);
+         this.turn = 'machine';
+         this.ai();
 
-       }else if(this.turn=='machine'){
-
-         this.pointObj[x].splice(y,1,2);
-
-         this.turn = 'my'
        }
-       this.isGameOver(x,y)
-       this.score(x,y)
+
+
     },
 
     score(x,y){
@@ -87,7 +87,8 @@ export default {
       let tempXIndex = x;
       let tempYIndex = y;
 
-      let score = 0;
+      let score = this.turn==='my'?this.userScore:this.aiScore;
+
       // 三维数组记录横向，纵向，左斜，右斜的移动
       let dir = [
         // 横向
@@ -100,7 +101,8 @@ export default {
         [ [  1, -1 ], [ -1, 1 ] ]
 
       ];
-      let time = 1;  //多个
+      let [alive2,sleep2,alive3,sleep3,alive4,sleep4,alive5] = [0,0,0,0,0,0,0];  //多个
+
       for (let i = 0; i < 4; i++) {
         let count = 1;
         let isAlive = 0;  //边界是否有对手的棋子
@@ -137,62 +139,184 @@ export default {
           tempYIndex = y;
         }
 
-       if(count>=5){
-          score +=10000
-       }
-       console.log(isAlive)
        if(count===2){
-           if(isAlive===0){
-             if(time==1){
-               score+=100
-               console.log('------活2-------')
-             }else if(time==2){
-               score+=500
-               console.log('------双活2-------')
-             }
-             time++
+         if(isAlive===0){
+            alive2++
+            console.log('------活2-------')
+         }else if(isAlive===1){
+            sleep2++
+           console.log('------眠2-------')
+         }else if(isAlive===2){
 
-           }else if(isAlive===1){
-             score+=50
-             console.log('------眠2-------')
-           }else if(isAlive===2){
-             score+=10
-             console.log('------死2-------')
-           }
+           console.log('------死2-------')
+         }
 
-       }
-        if(count===3){
-          if(isAlive===0){
-            if(time==1){
-              score+=1000
-              console.log('------活3-------')
-            }else if(time==2){
-              score+=5000
-              console.log('------双活3-------')
-            }
-            time++
-          }else if(isAlive===1){
-            if(time==1){
-              score+=200
-              console.log('------眠3-------')
-            }else if(time==2){
-              score+=500
-              console.log('------双眠3-------')
-            }
-            time++
-          }else if(isAlive===2){
-            score+=100
+     }
+       if(count===3){
+        if(isAlive===0){
+            alive3++
+            console.log('------活3-------')
+        }else if(isAlive===1){
+            sleep3++
+            console.log('------眠3-------')
+        }else if(isAlive===2){
+//            score+=1
             console.log('------死3-------')
-          }
-
         }
 
+      }
+       if(count===4){
+        if(isAlive===0){
+          alive4++
+          console.log('------活4-------')
+        }else if(isAlive===1){
+          sleep4++
+          console.log('------眠4-------')
+        }else if(isAlive===2){
+//          score+=1
+          console.log('------死4-------')
+        }
 
       }
+
+        if(count>=5){
+          alive5++;
+          break;
+        }
+
+      }
+      if(alive5===1){
+        score+=1000000
+      }
+      //活4双眠4 眠4活3 双活4
+      if(alive4===2||alive4===1||sleep4===2||(sleep4===1&&alive3===1)||(sleep4===1&&alive3===2)){
+          score+=10000
+      }
+      // 双活3
+      if(alive3===2){
+        score+=5000
+      }
+      //眠4
+      if(sleep4===1){
+        score+=500
+        if(sleep3===1){
+          score+=500
+        }
+        if(sleep3===2){
+          score+=4000
+        }
+        if(alive2===1){
+          score+=100
+        }
+        if(alive2===2){
+          score+=500
+        }
+        if(sleep2===1){
+          score+=50
+        }
+        if(sleep2===2){
+          score+=100
+        }
+      }
+      //活3
+      if(alive3===1){
+        score+=100
+        if(sleep3===1){
+          score+=100
+        }
+        if(sleep3===2){
+          score+=500
+        }
+        if(alive2===1){
+          score+=50
+        }
+        if(alive2===2){
+          score+=100
+        }
+        if(sleep2===1){
+          score+=10
+        }
+        if(sleep2===2){
+          score+=50
+        }
+      }
+      //双眠3
+      if(sleep3===2){
+        score+=100
+        if(alive2===1){
+          score+=100
+        }
+        if(alive2===2){
+          score+=200
+        }
+        if(sleep2===1){
+          score+=20
+        }
+        if(sleep2===2){
+          score+=100
+        }
+      }
+      //眠3
+      if(sleep3===1){
+        score+=50
+        if(alive2===1){
+          score+=50
+        }
+        if(alive2===2){
+          score+=100
+        }
+        if(sleep2===1){
+          score+=10
+        }
+        if(sleep2===2){
+          score+=50
+        }
+      }
+      //活2
+      if(alive2===3){
+        score+=100
+      }
+      if(alive2===2){
+        score+=30
+        if(sleep2===1){
+          score+=10
+        }
+
+      }
+      if(alive2===1){
+        score+=10
+        if(sleep2===1){
+          score+=10
+        }
+        if(sleep2===2){
+          score+=20
+        }
+      }
+      if(sleep2===3&&sleep2===2){
+        score+=10
+      }
+      if(sleep2===1){
+        score+=5
+      }
+
+      if(this.turn==='my'){
+        this.userScore = score
+      }else{
+        this.aiScore = score
+      }
+      console.log('user得分---'+this.userScore)
+      console.log('ai得分---'+this.aiScore)
 
     },
 
     ai(){
+
+      for(let x=1; x<=len; x++){
+
+        for(let y=1; y<=len; y++){
+//          this.pointObj[x][y]
+        }
+      }
 
 
 
