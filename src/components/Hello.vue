@@ -29,7 +29,6 @@ export default {
       isOver:false,
       machine:[],
       myS:0,
-
       userScore:0,
       aiScore:0,
       a:[[1,2],[3,4]]
@@ -72,9 +71,10 @@ export default {
 
        if(this.turn=='my'){
 
+         this.score(x,y);
+
          this.pointObj[x].splice(y,1,1);
 
-         this.score(x,y);
          this.isGameOver(x,y);
          this.turn = 'machine';
          this.ai();
@@ -90,16 +90,7 @@ export default {
       let tempXIndex = x;
       let tempYIndex = y;
 
-      let score = this.turn==='my'?this.userScore:this.aiScore;
-
-
-       let a1 = 7 - Math.abs(x-8)
-       let a2 = 7 - Math.abs(y-8)
-       if(a1-a2>=0){
-         score+=a2
-       }else{
-         score+=a1
-       }
+      let score = 0;
 
       // 三维数组记录横向，纵向，左斜，右斜的移动
       let dir = [
@@ -136,7 +127,8 @@ export default {
               flag = false;
               break;
             }
-            if ((this.pointObj[tempXIndex][tempYIndex] === this.pointObj[x][y])) {
+
+            if (this.pointObj[tempXIndex][tempYIndex] === (this.turn==='my'?1:2)) {
               count++;
 
             } else if(this.pointObj[tempXIndex][tempYIndex]===0){
@@ -193,24 +185,25 @@ export default {
 
         if(count>=5){
           alive5++;
+          console.log(count)
           break;
         }
-
       }
+
       if(alive5===1){
-        score+=1000000
+        score=1000000
       }
       //活4双眠4 眠4活3 双活4
       if(alive4===2||alive4===1||sleep4===2||(sleep4===1&&alive3===1)||(sleep4===1&&alive3===2)){
-          score+=10000
+          score=10000
       }
       // 双活3
       if(alive3===2){
-        score+=5000
+        score=5000
       }
       //眠4
       if(sleep4===1){
-        score+=500
+        score=500
         if(sleep3===1){
           score+=500
         }
@@ -232,7 +225,7 @@ export default {
       }
       //活3
       if(alive3===1){
-        score+=100
+        score=100
         if(sleep3===1){
           score+=100
         }
@@ -254,49 +247,49 @@ export default {
       }
       //双眠3
       if(sleep3===2){
-        score+=100
+        score=50
         if(alive2===1){
-          score+=100
+          score+=10
         }
         if(alive2===2){
-          score+=200
+          score+=30
         }
         if(sleep2===1){
-          score+=20
+          score+=5
         }
         if(sleep2===2){
-          score+=100
+          score+=10
         }
       }
       //眠3
       if(sleep3===1){
-        score+=50
+        score+=30
         if(alive2===1){
-          score+=50
-        }
-        if(alive2===2){
-          score+=100
-        }
-        if(sleep2===1){
           score+=10
         }
+        if(alive2===2){
+          score+=30
+        }
+        if(sleep2===1){
+          score+=5
+        }
         if(sleep2===2){
-          score+=50
+          score+=10
         }
       }
-      //活2
+      //3活2
       if(alive2===3){
-        score+=100
+        score=50
       }
       if(alive2===2){
-        score+=30
+        score=20
         if(sleep2===1){
           score+=10
         }
 
       }
       if(alive2===1){
-        score+=10
+        score=10
         if(sleep2===1){
           score+=10
         }
@@ -305,12 +298,22 @@ export default {
         }
       }
       if(sleep2===3&&sleep2===2){
-        score+=10
+        score=10
       }
       if(sleep2===1){
-        score+=5
+        score=5
       }
 
+
+
+      //每走一步棋 加分，中心点加最多
+      let a1 = 7 - Math.abs(x-8)
+      let a2 = 7 - Math.abs(y-8)
+      if(a1-a2>=0){
+        score+=a2
+      }else{
+        score+=a1
+      }
       if(this.turn==='my'){
         this.userScore = score
       }else{
@@ -323,10 +326,17 @@ export default {
 
     ai(){
       let len = 15;
+
+      if(this.userScore>=100){
+          console.log('可能需要防守')
+      }else{
+
+      }
+      this.score(1,1);
       for(let x=1; x<=len; x++){
 
         for(let y=1; y<=len; y++){
-//          this.pointObj[x][y]
+
         }
       }
 
@@ -341,6 +351,9 @@ export default {
       let flag;
       let tempXIndex = x;
       let tempYIndex = y;
+
+
+
       // 三维数组记录横向，纵向，左斜，右斜的移动
       let dir = [
         // 横向
