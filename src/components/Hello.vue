@@ -84,7 +84,7 @@ export default {
 
     },
 
-    score(x,y){
+    score(x,y,type){
       let max = 0;  //是否赢了
       let flag;
       let tempXIndex = x;
@@ -121,14 +121,16 @@ export default {
           while (flag) {
             tempXIndex = tempXIndex + dir[i][j][0];
             tempYIndex = tempYIndex + dir[i][j][1];
-            if(tempXIndex===0||tempYIndex===0) break;
+            if(tempXIndex===0||tempYIndex===0||tempXIndex>15||tempYIndex>15){
+               break
+            };
             //当前点的5个点范围内去计算
             if (Math.abs(tempXIndex-x)>4||Math.abs(tempYIndex-y)>4){
               flag = false;
               break;
             }
-
-            if (this.pointObj[tempXIndex][tempYIndex] === (this.turn==='my'?1:2)) {
+//            console.log(tempXIndex,tempYIndex,this.pointObj[tempXIndex][tempYIndex])
+            if (this.pointObj[tempXIndex][tempYIndex] === (type==='my'?1:2)) {
               count++;
 
             } else if(this.pointObj[tempXIndex][tempYIndex]===0){
@@ -137,6 +139,8 @@ export default {
               isAlive++
               flag = false;
             }
+
+
 
           }
           tempXIndex = x;
@@ -309,36 +313,69 @@ export default {
       //每走一步棋 加分，中心点加最多
       let a1 = 7 - Math.abs(x-8)
       let a2 = 7 - Math.abs(y-8)
+
       if(a1-a2>=0){
         score+=a2
       }else{
         score+=a1
       }
-      if(this.turn==='my'){
+
+      if(type==='my'){
         this.userScore = score
       }else{
         this.aiScore = score
       }
-      console.log('user得分---'+this.userScore)
-      console.log('ai得分---'+this.aiScore)
+
 
     },
 
     ai(){
       let len = 15;
+      let ai = [],
+        user = [],
+        aiScore = 0,
+        userScore = 0,
+        turn = 'ai',
+        userThisStepScore = this.userScore  //对手这一步的分数
+      ;
 
-      if(this.userScore>=100){
-          console.log('可能需要防守')
-      }else{
-
-      }
-      this.score(1,1);
       for(let x=1; x<=len; x++){
+          for(let y=1; y<=len; y++){
+              //这个位置没下过棋
+            if( this.pointObj[x][y]==0){
+              this.score(x,y,'ai');
+              this.score(x,y,'my');
+              if(aiScore<=this.aiScore){
+                aiScore=this.aiScore
+                ai = [x,y];
+              }
+              if(userScore<=this.userScore){
+                userScore=this.userScore
+                user = [x,y];
+              }
+            }
 
-        for(let y=1; y<=len; y++){
-
+          }
         }
+        //如果下一步能赢，不用考虑下面的
+      if(aiScore==1000000){
+        this.pointObj[ai[0]].splice(ai[1],1,2);
+        this.isGameOver(ai[0],ai[1]);
+        this.turn = 'my';
+        return false
       }
+      //如果对方下一步能赢，需要防守
+      if(userScore==1000000){
+        console.log('需要防守')
+        this.pointObj[user[0]].splice(user[1],1,2);
+        this.isGameOver(user[0],user[1]);
+        this.turn = 'my';
+      }else{
+          if(userScore>=5000){
+
+          }
+      }
+
 
     },
     /**
@@ -406,6 +443,10 @@ export default {
 
         return true;
       }
+
+
+      console.log('user得分---'+this.userScore)
+      console.log('ai得分---'+this.aiScore)
 
 
     }
