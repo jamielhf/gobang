@@ -71,13 +71,14 @@ export default {
 
        if(this.turn=='my'){
 
-         this.score(x,y);
+         this.score(x,y,'my');
+//         console.log('user------',this.userScore)
 
          this.pointObj[x].splice(y,1,1);
 
          this.isGameOver(x,y);
          this.turn = 'machine';
-         this.ai();
+         this.ai(3);
 
        }
 
@@ -150,39 +151,39 @@ export default {
        if(count===2){
          if(isAlive===0){
             alive2++
-            console.log('------活2-------')
+//            console.log('------活2-------')
          }else if(isAlive===1){
             sleep2++
-           console.log('------眠2-------')
+//           console.log('------眠2-------')
          }else if(isAlive===2){
 
-           console.log('------死2-------')
+//           console.log('------死2-------')
          }
 
      }
        if(count===3){
         if(isAlive===0){
             alive3++
-            console.log('------活3-------')
+//            console.log('------活3-------')
         }else if(isAlive===1){
             sleep3++
-            console.log('------眠3-------')
+//            console.log('------眠3-------')
         }else if(isAlive===2){
 //            score+=1
-            console.log('------死3-------')
+//            console.log('------死3-------')
         }
 
       }
        if(count===4){
         if(isAlive===0){
           alive4++
-          console.log('------活4-------')
+//          console.log('------活4-------')
         }else if(isAlive===1){
           sleep4++
-          console.log('------眠4-------')
+//          console.log('------眠4-------')
         }else if(isAlive===2){
 //          score+=1
-          console.log('------死4-------')
+//          console.log('------死4-------')
         }
 
       }
@@ -226,9 +227,7 @@ export default {
         if(sleep2===2){
           score+=100
         }
-      }
-      //活3
-      if(alive3===1){
+      }else  if(alive3===1){
         score=100
         if(sleep3===1){
           score+=100
@@ -248,9 +247,7 @@ export default {
         if(sleep2===2){
           score+=50
         }
-      }
-      //双眠3
-      if(sleep3===2){
+      }else if(sleep3===2){
         score=50
         if(alive2===1){
           score+=10
@@ -264,9 +261,7 @@ export default {
         if(sleep2===2){
           score+=10
         }
-      }
-      //眠3
-      if(sleep3===1){
+      }else  if(sleep3===1){
         score+=30
         if(alive2===1){
           score+=10
@@ -280,19 +275,15 @@ export default {
         if(sleep2===2){
           score+=10
         }
-      }
-      //3活2
-      if(alive2===3){
+      } else if(alive2===3){ //3活2
         score=50
-      }
-      if(alive2===2){
+      }else if(alive2===2){
         score=20
         if(sleep2===1){
           score+=10
         }
 
-      }
-      if(alive2===1){
+      }else if(alive2===1){
         score=10
         if(sleep2===1){
           score+=10
@@ -300,11 +291,9 @@ export default {
         if(sleep2===2){
           score+=20
         }
-      }
-      if(sleep2===3&&sleep2===2){
+      }else  if(sleep2===3&&sleep2===2){
         score=10
-      }
-      if(sleep2===1){
+      }else  if(sleep2===1){
         score=5
       }
 
@@ -329,27 +318,27 @@ export default {
 
     },
 
-    ai(){
+    ai(dep){
       let len = 15;
       let ai = [],
         user = [],
         aiScore = 0,
         userScore = 0,
-        turn = 'ai',
+        isAttack = true, //是否进攻
         userThisStepScore = this.userScore  //对手这一步的分数
       ;
 
-      for(let x=1; x<=len; x++){
+       for(let x=1; x<=len; x++){
           for(let y=1; y<=len; y++){
               //这个位置没下过棋
-            if( this.pointObj[x][y]==0){
+            if(this.pointObj[x][y]==0){
               this.score(x,y,'ai');
               this.score(x,y,'my');
-              if(aiScore<=this.aiScore){
+              if(aiScore<this.aiScore){
                 aiScore=this.aiScore
                 ai = [x,y];
               }
-              if(userScore<=this.userScore){
+              if(userScore<this.userScore){
                 userScore=this.userScore
                 user = [x,y];
               }
@@ -357,25 +346,39 @@ export default {
 
           }
         }
-        //如果下一步能赢，不用考虑下面的
-      if(aiScore==1000000){
+         console.log('aiScore----',aiScore)
+         console.log('next-----',userScore)
+        //如果对方下一步能赢，需要防守
+        if(userScore>=1000000){
+          console.log('需要防守')
+          isAttack = false
+        }else{
+          //如果下一步能赢，不用考虑下面的
+          if(aiScore>=1000000){
+            isAttack = true
+
+          }else if(userScore>=5000){
+            console.log('需要防守')
+            isAttack = false
+          }else if(aiScore>=userThisStepScore){
+            isAttack = true
+          }else{
+            isAttack = false
+          }
+
+        }
+
+
+      if(isAttack){
         this.pointObj[ai[0]].splice(ai[1],1,2);
         this.isGameOver(ai[0],ai[1]);
-        this.turn = 'my';
-        return false
-      }
-      //如果对方下一步能赢，需要防守
-      if(userScore==1000000){
-        console.log('需要防守')
+      }else{
         this.pointObj[user[0]].splice(user[1],1,2);
         this.isGameOver(user[0],user[1]);
-        this.turn = 'my';
-      }else{
-          if(userScore>=5000){
-
-          }
       }
-
+      this.aiScore = aiScore;
+      this.turn = 'my';
+//      console.log('ai-----',this.aiScore)
 
     },
     /**
@@ -388,8 +391,6 @@ export default {
       let flag;
       let tempXIndex = x;
       let tempYIndex = y;
-
-
 
       // 三维数组记录横向，纵向，左斜，右斜的移动
       let dir = [
@@ -443,10 +444,6 @@ export default {
 
         return true;
       }
-
-
-      console.log('user得分---'+this.userScore)
-      console.log('ai得分---'+this.aiScore)
 
 
     }
