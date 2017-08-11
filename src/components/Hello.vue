@@ -2,6 +2,7 @@
 
     <div class="chess">
     <p>轮到{{txt}}</p>
+      <p @click="back">撤回</p>
       <template v-for="(i,x) in pointObj">
           <template v-for="(v,y) in i">
             <i @click="setPoint(x,y)" :class="v==1?'b':v==2?'w':''"> {{x}},{{y}},{{v}}</i>
@@ -31,6 +32,8 @@ export default {
       myS:0,
       userScore:0,
       aiScore:0,
+      userStep:[],  //用户走的棋
+      aiStep:[],//ai走的棋
       a:[[1,2],[3,4]]
     }
   },
@@ -71,16 +74,19 @@ export default {
 
        if(this.turn=='my'){
 
-         this.score(x,y,'my');
-//         console.log('user------',this.userScore)
+
+         console.log('user------',this.userScore)
 
          this.pointObj[x].splice(y,1,1);
-
+//         console.table(this.pointObj)
+         this.userStep.push([x,y])
+         this.score(x,y,'my');
          this.isGameOver(x,y);
          this.turn = 'machine';
-         this.ai(3);
+//         this.ai(3);
 
        }
+
 
 
     },
@@ -110,6 +116,7 @@ export default {
       for (let i = 0; i < 4; i++) {
         let count = 1;
         let isAlive = 0;  //边界是否有对手的棋子
+        let arr =[type=='my'?1:'2'] //单方向棋子的数组
 
         //j为0,1分别为棋子的两边方向，比如对于横向的时候，j=0,表示下棋位子的左边，j=1的时候表示右边
         for (let j = 0; j < 2; j++) {
@@ -130,23 +137,29 @@ export default {
               flag = false;
               break;
             }
-//            console.log(tempXIndex,tempYIndex,this.pointObj[tempXIndex][tempYIndex])
-            if (this.pointObj[tempXIndex][tempYIndex] === (type==='my'?1:2)) {
-              count++;
-
-            } else if(this.pointObj[tempXIndex][tempYIndex]===0){
-
+            if(j>0){
+              arr.push(this.pointObj[tempXIndex][tempYIndex]);
             }else{
-              isAlive++
-              flag = false;
+              arr.unshift(this.pointObj[tempXIndex][tempYIndex]);
             }
 
 
+//            console.log(tempXIndex,tempYIndex,this.pointObj[tempXIndex][tempYIndex])
+//            if (this.pointObj[tempXIndex][tempYIndex] === (type==='my'?1:2)) {
+//              count++;
+//
+//            } else if(this.pointObj[tempXIndex][tempYIndex]===0){
+//
+//            }else{
+//              isAlive++
+//              flag = false;
+//            }
 
           }
           tempXIndex = x;
           tempYIndex = y;
         }
+        console.log(arr,type)
 
        if(count===2){
          if(isAlive===0){
@@ -187,12 +200,12 @@ export default {
         }
 
       }
-
-        if(count>=5){
+       if(count>=5){
           alive5++;
           console.log(count)
           break;
         }
+
       }
 
       if(alive5===1){
@@ -372,11 +385,16 @@ export default {
       if(isAttack){
         this.pointObj[ai[0]].splice(ai[1],1,2);
         this.isGameOver(ai[0],ai[1]);
+        this.aiStep.push([ai[0],ai[1]])
       }else{
         this.pointObj[user[0]].splice(user[1],1,2);
         this.isGameOver(user[0],user[1]);
+        this.aiStep.push([user[0],user[1]])
       }
       this.aiScore = aiScore;
+
+
+
       this.turn = 'my';
 //      console.log('ai-----',this.aiScore)
 
@@ -444,6 +462,23 @@ export default {
 
         return true;
       }
+
+
+    },
+    /**
+     * 撤回
+     */
+    back(){
+       let ai = this.aiStep[this.aiStep.length-1];
+       let user = this.userStep[this.userStep.length-1];
+
+       this.aiStep.pop()
+       this.userStep.pop()
+
+       this.pointObj[ai[0]].splice(ai[1],1,0);
+       this.pointObj[user[0]].splice(user[1],1,0);
+
+
 
 
     }
