@@ -1,7 +1,7 @@
 <template>
 
     <div class="chess">
-    <p>轮到{{txt}}</p>
+    <p>轮到{{txt1}}</p>
       <p @click="back">撤回</p>
       <template v-for="(i,x) in pointObj">
           <template v-for="(v,y) in i">
@@ -40,10 +40,11 @@ export default {
   },
 
   computed:{
-    txt:function () {
-      return this.turn==='my'?'我':'机器'
+    txt1:function () {
+      return this.turn=='my'?'我':'AI'
     }
   },
+
   created(){
     let pointObj  = [];
     let len =15;
@@ -61,7 +62,6 @@ export default {
      * 下棋  x,y坐标
      * @param x
      * @param y
-     * @returns {boolean}
      */
     setPoint(x,y){
 
@@ -85,6 +85,8 @@ export default {
 
          this.isGameOver(x,y);
          this.turn = 'machine';
+         console.log(this.turn)
+         console.log(this.txt)
          this.ai(3);
 
        }
@@ -92,6 +94,7 @@ export default {
 
 
     },
+
 
     score(x,y,type){
       let max = 0;  //是否赢了
@@ -167,7 +170,7 @@ export default {
           tempYIndex = y;
         }
 //        console.log(arr,type)
-
+    //评估分数 如果下棋形成多个情况也要加分
        if(count===2){
          if(isAlive===0){
             alive2++
@@ -317,8 +320,6 @@ export default {
         score=5
       }
 
-
-
       //每走一步棋 加分，中心点加最多
       let a1 = 7 - Math.abs(x-8)
       let a2 = 7 - Math.abs(y-8)
@@ -337,7 +338,10 @@ export default {
 
 
     },
-
+    /**
+     * AI
+     * @param dep
+     */
     ai(dep){
       let len = 15;
       let ai = [],
@@ -346,7 +350,6 @@ export default {
         userScore = 0,
         isAttack = true, //是否进攻
         userThisStepScore = this.userScore  //对手这一步的分数
-      ;
 
        for(let x=1; x<=len; x++){
           for(let y=1; y<=len; y++){
@@ -390,7 +393,6 @@ export default {
 
         }
 
-
       if(isAttack){
         this.pointObj[ai[0]].splice(ai[1],1,2);
         this.isGameOver(ai[0],ai[1]);
@@ -401,8 +403,6 @@ export default {
         this.aiStep.push([user[0],user[1]])
       }
       this.aiScore = aiScore;
-
-
 
       this.turn = 'my';
 //      console.log('ai-----',this.aiScore)
@@ -486,8 +486,6 @@ export default {
 
        this.pointObj[ai[0]].splice(ai[1],1,0);
        this.pointObj[user[0]].splice(user[1],1,0);
-
-
 
 
     }
