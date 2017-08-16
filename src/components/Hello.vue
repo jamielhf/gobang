@@ -26,7 +26,8 @@ export default {
       turn:'my',
       len:15,
       classObj:{},
-      pointObj:[],
+      pointObj:[],  //棋盘数组
+      copy:[],  //复制的棋盘数组
       isOver:false,
       machine:[],
       myS:0,
@@ -52,7 +53,7 @@ export default {
         pointObj[x][y]=0
       }
     }
-
+    this.copy = pointObj
     this.pointObj = pointObj;
   },
   methods:{
@@ -74,16 +75,17 @@ export default {
 
        if(this.turn=='my'){
 
-
+         this.score(x,y,'my');
          console.log('user------',this.userScore)
 
          this.pointObj[x].splice(y,1,1);
+
 //         console.table(this.pointObj)
          this.userStep.push([x,y])
-         this.score(x,y,'my');
+
          this.isGameOver(x,y);
          this.turn = 'machine';
-//         this.ai(3);
+         this.ai(3);
 
        }
 
@@ -115,9 +117,15 @@ export default {
 
       for (let i = 0; i < 4; i++) {
         let count = 1;
-        let isAlive = 0;  //边界是否有对手的棋子
-        let arr =[type=='my'?1:'2'] //单方向棋子的数组
+        let isAlive = 0;  //边界是否有对手的棋子  或者两边都是没下棋的
+//        let arr =[type=='my'?1:'2'] //单方向棋子的数组
 
+        //落子的左右都是没人下棋的时候
+        if(x>1&&x<15&&y>1&&y<15){
+          if(this.pointObj[x+dir[i][0][0]][y+dir[i][0][1]]==0&&this.pointObj[x+dir[i][1][0]][y+dir[i][1][1]]==0){
+            isAlive++
+          }
+        }
         //j为0,1分别为棋子的两边方向，比如对于横向的时候，j=0,表示下棋位子的左边，j=1的时候表示右边
         for (let j = 0; j < 2; j++) {
           flag = true;
@@ -126,40 +134,39 @@ export default {
            有相同颜色的棋子的时候，Count++
            否则置flag为false，结束该该方向的遍历
            **/
+
           while (flag) {
+
             tempXIndex = tempXIndex + dir[i][j][0];
             tempYIndex = tempYIndex + dir[i][j][1];
             if(tempXIndex===0||tempYIndex===0||tempXIndex>15||tempYIndex>15){
+               isAlive++;
+               flag = false;
                break
             };
+
+
             //当前点的5个点范围内去计算
             if (Math.abs(tempXIndex-x)>4||Math.abs(tempYIndex-y)>4){
               flag = false;
               break;
             }
-            if(j>0){
-              arr.push(this.pointObj[tempXIndex][tempYIndex]);
+
+            if (this.pointObj[tempXIndex][tempYIndex] === (type==='my'?1:2)) {
+              count++;
+
+            } else if(this.pointObj[tempXIndex][tempYIndex]===0){
+
             }else{
-              arr.unshift(this.pointObj[tempXIndex][tempYIndex]);
+              isAlive++
+              flag = false;
             }
-
-
-//            console.log(tempXIndex,tempYIndex,this.pointObj[tempXIndex][tempYIndex])
-//            if (this.pointObj[tempXIndex][tempYIndex] === (type==='my'?1:2)) {
-//              count++;
-//
-//            } else if(this.pointObj[tempXIndex][tempYIndex]===0){
-//
-//            }else{
-//              isAlive++
-//              flag = false;
-//            }
 
           }
           tempXIndex = x;
           tempYIndex = y;
         }
-        console.log(arr,type)
+//        console.log(arr,type)
 
        if(count===2){
          if(isAlive===0){
@@ -347,13 +354,15 @@ export default {
             if(this.pointObj[x][y]==0){
               this.score(x,y,'ai');
               this.score(x,y,'my');
-              if(aiScore<this.aiScore){
+              if(aiScore<=this.aiScore){
                 aiScore=this.aiScore
                 ai = [x,y];
               }
-              if(userScore<this.userScore){
+              if(userScore<=this.userScore){
                 userScore=this.userScore
                 user = [x,y];
+                console.log(userScore)
+                console.log(user)
               }
             }
 
